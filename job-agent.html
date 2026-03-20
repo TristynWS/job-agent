@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0c0e;--surface:#141417;--surface2:#1c1c21;
+  --border:#2a2a31;--border2:#3a3a44;--text:#e8e8ee;
+  --muted:#7a7a8a;--dim:#4a4a5a;
+  --accent:#6f5af6;--accent2:#8b72ff;
+  --green:#22c97a;--amber:#f5a623;--red:#f5504a;--teal:#2dd4c0;
+  --mono:'DM Mono',monospace;--sans:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:15px 26px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100;}
+.logo{font-size:17px;font-weight:800;letter-spacing:-.5px;}.logo span{color:var(--accent2);}
+.how-it-works{font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(111,90,246,.08);border:1px solid rgba(111,90,246,.2);padding:5px 12px;border-radius:20px;}
+
+nav{display:flex;padding:0 26px;background:var(--surface);border-bottom:1px solid var(--border);}
+.tab{font-family:var(--mono);font-size:11px;color:var(--muted);padding:12px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.07em;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+.tab:hover{color:var(--text);}.tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
+.cnt{background:var(--accent);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;display:none;font-weight:600;}
+.cnt.on{display:inline;}
+
+main{padding:22px 26px;max-width:1100px;}
+.panel{display:none;}.panel.active{display:block;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:16px;}
+.ct{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:14px;}
+
+textarea,input[type=text],select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:8px;resize:vertical;outline:none;transition:border-color .2s;}
+textarea:focus,input:focus,select:focus{border-color:var(--accent);}
+textarea{min-height:90px;}
+label{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:5px;display:block;letter-spacing:.05em;}
+.fr{margin-bottom:13px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;}
+
+.btn{font-family:var(--mono);font-size:12px;font-weight:500;padding:9px 17px;border-radius:8px;cursor:pointer;border:none;transition:all .18s;letter-spacing:.04em;display:inline-flex;align-items:center;gap:7px;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--accent2);transform:translateY(-1px);}.btn-p:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border);}.btn-g:hover{border-color:var(--border2);color:var(--text);}
+.btn-teal{background:rgba(45,212,192,.12);color:var(--teal);border:1px solid rgba(45,212,192,.25);}.btn-teal:hover{background:rgba(45,212,192,.2);}
+.btn-s{padding:6px 12px;font-size:11px;}
+.btn-d{background:rgba(245,80,74,.1);color:var(--red);border:1px solid rgba(245,80,74,.2);}
+
+.badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap;}
+.bpurp{background:rgba(111,90,246,.15);color:var(--accent2);border:1px solid rgba(111,90,246,.25);}
+.bteal{background:rgba(45,212,192,.12);color:var(--teal);border:1px solid rgba(45,212,192,.2);}
+.bamb{background:rgba(245,166,35,.12);color:var(--amber);border:1px solid rgba(245,166,35,.2);}
+.bred{background:rgba(245,80,74,.12);color:var(--red);border:1px solid rgba(245,80,74,.2);}
+.bgrn{background:rgba(34,201,122,.12);color:var(--green);border:1px solid rgba(34,201,122,.2);}
+
+/* step badge */
+.step{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(111,90,246,.2);color:var(--accent2);font-family:var(--mono);font-size:11px;font-weight:600;flex-shrink:0;}
+
+/* job cards */
+.job-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:15px 17px;margin-bottom:9px;transition:border-color .2s;}
+.job-card:hover{border-color:var(--border2);}
+.jt{font-size:14px;font-weight:700;}.jco{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px;}
+.jmeta{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px;}
+.jact{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap;}
+
+/* prompt box */
+.prompt-box{background:var(--surface2);border:1px solid rgba(111,90,246,.3);border-radius:8px;padding:14px;font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--muted);white-space:pre-wrap;max-height:260px;overflow-y:auto;position:relative;}
+.prompt-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);margin-bottom:7px;}
+
+/* result input area */
+.result-area{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0;}
+.result-area textarea{border:none;background:transparent;min-height:180px;font-size:13px;padding:14px;}
+.result-saved{background:var(--surface2);border:1px solid rgba(34,201,122,.2);border-radius:8px;padding:14px;font-family:var(--mono);font-size:13px;line-height:1.75;color:var(--text);white-space:pre-wrap;position:relative;max-height:320px;overflow-y:auto;}
+
+.cpybtn{position:absolute;top:9px;right:9px;font-family:var(--mono);font-size:11px;background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .2s;}
+.cpybtn:hover{color:var(--text);}
+
+/* log */
+.slog{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:12px;color:var(--muted);max-height:140px;overflow-y:auto;line-height:1.8;}
+.ll{display:flex;gap:8px;}.ts{color:var(--dim);flex-shrink:0;}.ll.ok .msg{color:var(--green);}.ll.err .msg{color:var(--red);}.ll.info .msg{color:var(--teal);}
+
+/* tracker */
+.trtable{width:100%;border-collapse:collapse;}
+.trtable th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:9px 12px;border-bottom:1px solid var(--border);text-align:left;}
+.trtable td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+.trtable tr:last-child td{border-bottom:none;}
+.trtable tr:hover td{background:rgba(255,255,255,.015);}
+.stsel{font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text);appearance:none;outline:none;}
+
+.stcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:15px 17px;text-align:center;}
+.stnum{font-size:28px;font-weight:800;font-family:var(--mono);}
+.stlbl{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.07em;text-transform:uppercase;margin-top:4px;}
+
+.subtabs{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap;}
+.stab{font-family:var(--mono);font-size:11px;padding:6px 13px;border-radius:6px;cursor:pointer;color:var(--muted);border:1px solid var(--border);transition:all .2s;}
+.stab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+.notice{background:rgba(111,90,246,.07);border:1px solid rgba(111,90,246,.2);border-radius:10px;padding:13px 17px;margin-bottom:16px;font-family:var(--mono);font-size:12px;color:var(--accent2);line-height:1.65;}
+.warn{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:13px 17px;margin-bottom:16px;font-family:var(--mono);font-size:12px;color:var(--amber);line-height:1.65;}
+.info-box{background:rgba(45,212,192,.05);border:1px solid rgba(45,212,192,.18);border-radius:10px;padding:13px 17px;margin-bottom:16px;font-family:var(--mono);font-size:12px;color:var(--teal);line-height:1.65;}
+
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.15);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:48px;color:var(--muted);font-family:var(--mono);font-size:13px;}
+
+/* flow diagram at top */
+.flow{display:flex;align-items:center;gap:0;margin-bottom:20px;flex-wrap:wrap;gap:4px;}
+.flow-step{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 13px;font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:7px;}
+.flow-step.active-flow{border-color:rgba(111,90,246,.4);color:var(--accent2);background:rgba(111,90,246,.07);}
+.flow-arrow{color:var(--dim);font-size:13px;padding:0 2px;}
+
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 17px;border-radius:10px;opacity:0;transform:translateY(8px);transition:all .28s;pointer-events:none;z-index:999;}
+#toast.show{opacity:1;transform:translateY(0);}
+
+/* modal overlay */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;width:100%;max-width:660px;max-height:90vh;overflow-y:auto;}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:6px;}
+.modal-sub{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">job<span>agent</span></div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-family:var(--mono);font-size:11px;color:var(--muted)" id="hdr-name">No profile</span>
+    <div class="how-it-works">Works with Claude.ai — no API key needed</div>
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="goTab('setup',this)">⚙ Setup</div>
+  <div class="tab" onclick="goTab('search',this)">⚡ Search <span class="cnt" id="cnt-s"></span></div>
+  <div class="tab" onclick="goTab('tailor',this)">✦ Tailor <span class="cnt" id="cnt-t"></span></div>
+  <div class="tab" onclick="goTab('tracker',this)">◎ Tracker <span class="cnt" id="cnt-k"></span></div>
+</nav>
+
+<main>
+
+<!-- ===== SETUP ===== -->
+<div class="panel active" id="panel-setup">
+
+  <div class="info-box">
+    ⚡ How this works: This app searches real job boards (JSearch API — free), then prepares prompts you paste into Claude.ai to score jobs and write your documents. No API keys needed beyond the free JSearch key.
+  </div>
+
+  <div class="card">
+    <div class="ct">JSearch API Key (free — for job searching)</div>
+    <div style="margin-bottom:8px">
+      <label>RAPIDAPI KEY — <a href="https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch" target="_blank" style="color:var(--accent2)">get free key in 2 min →</a></label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="jkey" placeholder="Paste your RapidAPI key here…" oninput="saveKeys()"/>
+        <span id="jkey-ok" style="font-family:var(--mono);font-size:14px;color:var(--green);align-self:center;flex-shrink:0"></span>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.7">
+      1. Go to rapidapi.com → search "JSearch" → click the first result<br>
+      2. Click "Subscribe to Test" → choose the free tier (200 searches/month)<br>
+      3. Go to any endpoint → find "X-RapidAPI-Key" in the header examples → copy it
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Your profile — set once, used everywhere</div>
+    <div class="g2" style="margin-bottom:13px">
+      <div class="fr"><label>FULL NAME</label><input type="text" id="p-name" placeholder="Alex Johnson"/></div>
+      <div class="fr"><label>TARGET ROLE(S)</label><input type="text" id="p-role" placeholder="Senior Product Designer, UX Lead"/></div>
+    </div>
+    <div class="g2" style="margin-bottom:13px">
+      <div class="fr"><label>YEARS OF EXPERIENCE</label><input type="text" id="p-yoe" placeholder="7 years"/></div>
+      <div class="fr"><label>LOCATION</label><input type="text" id="p-loc" placeholder="New York, NY — open to remote"/></div>
+    </div>
+    <div class="g2" style="margin-bottom:13px">
+      <div class="fr"><label>TARGET COMPANIES (comma-separated)</label><input type="text" id="p-cos" placeholder="Stripe, Linear, Vercel, Figma"/></div>
+      <div class="fr"><label>DEAL-BREAKERS</label><input type="text" id="p-db" placeholder="no equity, no remote, under $100k"/></div>
+    </div>
+    <div class="fr" style="margin-bottom:13px">
+      <label>MASTER RESUME (paste full text)</label>
+      <textarea id="p-resume" style="min-height:200px" placeholder="Paste your full resume — work history, skills, education, projects, links…"></textarea>
+    </div>
+    <div class="fr" style="margin-bottom:18px">
+      <label>UNIQUE VALUE PROP (2–3 sentences — used in cover letters)</label>
+      <textarea id="p-uvp" style="min-height:70px" placeholder="What makes you stand out?"></textarea>
+    </div>
+    <button class="btn btn-p" onclick="saveProfile()">Save profile →</button>
+  </div>
+</div>
+
+<!-- ===== SEARCH ===== -->
+<div class="panel" id="panel-search">
+
+  <div id="warn-search" class="warn" style="display:none">⚠ Add your JSearch API key in Setup first. It's free and takes 2 minutes.</div>
+  <div id="warn-profile" class="warn" style="display:none">⚠ Fill in your profile in Setup so the scoring prompts work properly.</div>
+
+  <div class="card">
+    <div class="ct">Search settings</div>
+    <div class="g2" style="margin-bottom:13px">
+      <div class="fr"><label>SEARCH QUERY (auto-filled from profile)</label><input type="text" id="sq" placeholder="Senior Product Designer"/></div>
+      <div class="fr"><label>LOCATION</label><input type="text" id="sloc" placeholder="New York, NY"/></div>
+    </div>
+    <div class="g2" style="margin-bottom:16px">
+      <div class="fr"><label>DATE POSTED</label>
+        <select id="sdate"><option value="3">Last 3 days</option><option value="7" selected>Last 7 days</option><option value="14">Last 14 days</option><option value="30">Last 30 days</option></select>
+      </div>
+      <div class="fr"><label>REMOTE</label>
+        <select id="sremote"><option value="">Any</option><option value="true">Remote only</option></select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-p" id="run-btn" onclick="runSearch()"><span id="run-txt">⚡ Find jobs</span></button>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--dim)">Searches real job boards · then prep Claude prompts to score each one</span>
+    </div>
+  </div>
+
+  <div id="log-card" class="card" style="display:none"><div class="ct">Search log</div><div class="slog" id="slog"></div></div>
+
+  <div id="results-area" style="display:none">
+    <div class="notice" id="score-notice">
+      ✦ <strong>Next step:</strong> Click "Copy score prompt" on any job below → paste it into Claude.ai → paste the response back. Or click "Score all" to get one big prompt for all jobs at once.
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;flex-wrap:wrap;gap:8px">
+      <div style="font-family:var(--mono);font-size:12px;color:var(--muted)" id="res-sum"></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn btn-teal btn-s" onclick="copyScoreAll()">Copy score-all prompt →</button>
+        <button class="btn btn-g btn-s" onclick="showPasteAll()">Paste scores back</button>
+        <button class="btn btn-g btn-s" onclick="queueAll()">Queue all for tailoring</button>
+      </div>
+    </div>
+    <div id="results-list"></div>
+  </div>
+</div>
+
+<!-- ===== TAILOR ===== -->
+<div class="panel" id="panel-tailor">
+  <div id="tailor-empty" class="empty" style="display:none">No jobs queued.<br>Search for jobs and queue the ones you want to apply to.</div>
+  <div id="tailor-content" style="display:none">
+    <div class="notice">
+      ✦ For each job below: pick a document type → copy the prompt → paste into Claude.ai → paste the result back to save it.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+      <span style="font-family:var(--mono);font-size:12px;color:var(--muted)" id="q-sum"></span>
+      <button class="btn btn-teal btn-s" onclick="copyAllResumes()">Copy all resume prompts →</button>
+    </div>
+    <div id="tailor-list"></div>
+  </div>
+</div>
+
+<!-- ===== TRACKER ===== -->
+<div class="panel" id="panel-tracker">
+  <div class="g4" style="margin-bottom:20px">
+    <div class="stcard"><div class="stnum" id="st-tot">0</div><div class="stlbl">Total</div></div>
+    <div class="stcard"><div class="stnum" style="color:var(--teal)" id="st-act">0</div><div class="stlbl">In progress</div></div>
+    <div class="stcard"><div class="stnum" style="color:var(--amber)" id="st-int">0</div><div class="stlbl">Interviews</div></div>
+    <div class="stcard"><div class="stnum" style="color:var(--green)" id="st-off">0</div><div class="stlbl">Offers</div></div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn btn-p btn-s" onclick="toggleAF()">+ Add manually</button>
+    <button class="btn btn-teal btn-s" onclick="copyFollowUpPrompt()">Copy follow-up prompt →</button>
+  </div>
+
+  <div id="fu-notice" class="notice" style="display:none">
+    Prompt copied! Paste it into Claude.ai → Claude will write follow-up messages for all your active applications.
+  </div>
+
+  <div id="add-form" class="card" style="display:none;margin-bottom:16px">
+    <div class="ct">Add job manually</div>
+    <div class="g2" style="gap:12px;margin-bottom:11px">
+      <div><label>ROLE</label><input type="text" id="af-role" placeholder="Senior Designer"/></div>
+      <div><label>COMPANY</label><input type="text" id="af-co" placeholder="Linear"/></div>
+    </div>
+    <div class="g2" style="gap:12px;margin-bottom:11px">
+      <div><label>DATE</label><input type="text" id="af-date"/></div>
+      <div><label>SALARY</label><input type="text" id="af-sal" placeholder="$130k–$160k"/></div>
+    </div>
+    <div style="margin-bottom:11px"><label>URL</label><input type="text" id="af-url" placeholder="https://…"/></div>
+    <div style="margin-bottom:13px"><label>NOTES</label><textarea id="af-notes" style="min-height:55px"></textarea></div>
+    <div style="display:flex;gap:7px"><button class="btn btn-p btn-s" onclick="addManual()">Save</button><button class="btn btn-g btn-s" onclick="toggleAF()">Cancel</button></div>
+  </div>
+
+  <div id="tr-empty" class="empty">No jobs tracked yet.</div>
+  <table class="trtable" id="tr-table" style="display:none">
+    <thead><tr><th>Role / Company</th><th>Score</th><th>Applied</th><th>Salary</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+    <tbody id="tr-body"></tbody>
+  </table>
+</div>
+
+</main>
+
+<!-- SCORE PASTE MODAL -->
+<div id="paste-modal" class="modal-bg" style="display:none" onclick="if(event.target===this)closePasteModal()">
+  <div class="modal">
+    <div class="modal-title">Paste Claude's score response</div>
+    <div class="modal-sub">Copy Claude's full response and paste it below. The app will parse the scores and update all job cards automatically.</div>
+    <textarea id="paste-input" style="min-height:200px;margin-bottom:12px" placeholder="Paste Claude's response here…"></textarea>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-p" onclick="parseScoreResponse()">Parse scores →</button>
+      <button class="btn btn-g" onclick="closePasteModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT PASTE MODAL -->
+<div id="result-modal" class="modal-bg" style="display:none" onclick="if(event.target===this)closeResultModal()">
+  <div class="modal">
+    <div class="modal-title" id="result-modal-title">Paste Claude's response</div>
+    <div class="modal-sub">Paste Claude's response below to save it.</div>
+    <textarea id="result-input" style="min-height:220px;margin-bottom:12px" placeholder="Paste Claude's response here…"></textarea>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-p" onclick="saveResult()">Save →</button>
+      <button class="btn btn-g" onclick="closeResultModal()">Cancel</button>
+    </div>
+  </div>
+  <div style="display:none" id="result-meta"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let P={}, K={}, results=[], queue=[], tracker=[];
+const STATUSES=['Researching','Applied','Phone screen','Interview','Offer','Rejected','Withdrawn'];
+
+(function boot(){
+  const sp=ls('ja_p');
+  if(sp){P=JSON.parse(sp);applyP();}
+  else {
+    // Pre-filled from uploaded resume
+    P={
+      name:'Tristyn Watkins-Sanchez',
+      role:'AI Operations Manager, Training Operations Lead, Remote Team Lead',
+      yoe:'15+ years',
+      loc:'United States — Remote',
+      cos:'Invisible Technologies, Scale AI, Anthropic, OpenAI, DataAnnotation, Surge AI, Appen',
+      db:'on-site only, no remote, entry-level, under $90k',
+      resume:`Tristyn Watkins-Sanchez
+tristynsanchez88@gmail.com | linkedin.com/in/eddiesanchez
+Remote Team Leadership & Training Specialist | AI/Tech Operations Expert
+
+SUMMARY
+I build operational systems that scale. Over the past decade, I've taken teams from 30 to 1000+ members, turned chaotic workflows into reliable delivery pipelines, and prevented quality failures that cost companies millions. I specialize in high-stakes environments: AI training data operations, enterprise client delivery, and distributed team management. Whether it's managing 17 concurrent AI training campaigns or driving 138% profit increases through logistics optimization, I deliver results that move the bottom line.
+
+EXPERIENCE
+
+Invisible Technologies — Training Operations Lead | July 2023 – Present
+• Led full-cycle operations for 17+ concurrent enterprise AI training campaigns across writing, multilingual tasks, video/image/audio evaluation, SFT data generation, LLM evaluation pipelines, and safety/red-teaming projects
+• Managed cross-functional delivery teams of 1000+ contributors, coordinating 30 team leads to ensure projects stayed on track with proactive issue and risk resolution
+• Built scalable async training systems and certification processes that maintained 96%+ quality standards across diverse project portfolios
+• Owned complete talent lifecycle from recruitment and training through certification and production delivery
+• Designed operational frameworks and performance dashboards providing real-time transparency for enterprise stakeholders
+• Achieved consistent sub-24-hour turnarounds from client kickoff to production launch
+• Participated in regular client-facing calls, collaborating on project requirements with enterprise stakeholders
+
+Freelance — Operations & E-Commerce Solutions Specialist | November 2022 – Present
+• Manage backend operations for e-commerce platforms including inventory management, order fulfillment workflows, and performance analytics
+• Maintain website infrastructure and database systems for seamless customer experience
+• Provide ongoing technical support and optimization for digital storefronts
+
+Dade Service Corporation — Warehouse Operations Manager | December 2018 – September 2022
+• Drove a 138% increase in net profit in the first year by optimizing logistics and sales strategies
+• Managed end-to-end supply chain including customs clearance, international shipping, and multi-carrier coordination
+• Implemented digital inventory control system for 500+ SKUs, reducing loss
+• Coordinated logistics for 15-person field installation team across multiple regions
+
+Timeshare Exit Partners — Senior Case Analyst | February 2018 – December 2018
+• Managed end-to-end contract resolution for high-value client cases
+• Negotiated settlements averaging $20,000 in client savings
+• Streamlined case management workflows using digital contract systems
+
+HG Arts — Operations Manager | September 2014 – January 2018
+• Managed cross-functional team of 30+ employees across production, sales, and admin
+• Directed 15-person remote national sales team with digital training systems and performance tracking
+• Reduced office expenses by 30% through vendor negotiations and resource optimization
+• Led recruitment and onboarding for 20+ employees
+
+Hobby Lobby — Department Manager & Regional Trainer | June 2010 – September 2014
+• Led operational setup and grand opening for 5+ stores across Florida
+• Trained 400+ employees across multiple store launches (groups of 10–20)
+• Managed department operations: scheduling, inventory control, customer satisfaction
+
+University of Toledo — Researcher & Data Entry/Analysis | August 2007 – May 2011
+• Led cognitive and consumer behavior psychology research using SAS
+• Collaborated with professors on data collection, analysis, and research presentation
+
+EDUCATION
+University of Toledo — B.S. Psychology, Minor: Fine Art (2007–2011)
+
+SKILLS
+Inventory Management · Automation · Data Integrity · Remote Team Leadership · AI Training Operations · LLM Evaluation · Quality Assurance · Workflow Design · Performance Dashboards · Talent Lifecycle Management · SFT Data Generation · Safety / Red-Teaming · Client-Facing Communication
+
+CERTIFICATIONS
+EF SET English Certificate 78/100 (C2 Proficient)`,
+      uvp:`I've scaled AI training operations from the ground up — managing 1000+ contributor teams, 17 concurrent enterprise campaigns, and 96%+ quality standards in fast-moving, high-stakes environments. I turn operational chaos into reliable delivery systems, and I've done it consistently across AI data, logistics, and distributed team management for over a decade.`
+    };
+    ls('ja_p',JSON.stringify(P));
+    applyP();
+  }
+  const sk=ls('ja_k'); if(sk){K=JSON.parse(sk);applyK();}
+  const sq=ls('ja_q'); if(sq) queue=JSON.parse(sq);
+  const st=ls('ja_t'); if(st) tracker=JSON.parse(st);
+  renderTracker(); renderTailQ(); counts();
+})();
+
+function ls(k,v){if(v!==undefined){localStorage.setItem(k,v);return;}return localStorage.getItem(k);}
+function v(id){return document.getElementById(id)?.value?.trim()||'';}
+function $(id){return document.getElementById(id);}
+
+// ---- TABS ----
+function goTab(t,el){
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active'); $('panel-'+t).classList.add('active');
+  if(t==='search'){
+    $('warn-search').style.display=!K.j?'block':'none';
+    $('warn-profile').style.display=!P.resume?'block':'none';
+  }
+  if(t==='tailor') renderTailQ();
+}
+function counts(){
+  $('cnt-s').textContent=results.length; $('cnt-s').classList.toggle('on',results.length>0);
+  $('cnt-t').textContent=queue.length; $('cnt-t').classList.toggle('on',queue.length>0);
+  $('cnt-k').textContent=tracker.length; $('cnt-k').classList.toggle('on',tracker.length>0);
+}
+
+// ---- KEYS + PROFILE ----
+function saveKeys(){K={j:v('jkey')};ls('ja_k',JSON.stringify(K));$('jkey-ok').textContent=K.j?'✓':'';}
+function applyK(){if(K.j){$('jkey').value=K.j;$('jkey-ok').textContent='✓';}}
+function saveProfile(){
+  P={name:v('p-name'),role:v('p-role'),yoe:v('p-yoe'),loc:v('p-loc'),cos:v('p-cos'),db:v('p-db'),resume:v('p-resume'),uvp:v('p-uvp')};
+  ls('ja_p',JSON.stringify(P)); applyP(); toast('Profile saved ✓');
+}
+function applyP(){
+  ['name','role','yoe','loc','cos','db','resume','uvp'].forEach(f=>{const el=$('p-'+f);if(el&&P[f])el.value=P[f];});
+  if(P.name)$('hdr-name').textContent=P.name;
+  if(P.role)$('sq').value=P.role.split(',')[0].trim();
+  if(P.loc)$('sloc').value=P.loc;
+}
+
+// ---- SEARCH ----
+async function runSearch(){
+  if(!K.j){toast('Add JSearch API key in Setup');return;}
+  const query=v('sq')||'software engineer';
+  const location=v('sloc');
+  const dateP=$('sdate').value;
+  const remote=$('sremote').value;
+
+  $('run-btn').disabled=true; $('run-txt').textContent='Searching…';
+  $('log-card').style.display='block'; $('results-area').style.display='none';
+  $('slog').innerHTML=''; results=[];
+
+  log('info',`Searching: "${query}"${location?' in '+location:''}`);
+
+  try{
+    const dateMap={'3':'3days','7':'week','14':'month','30':'month'};
+    const q = location ? query+' '+location : query;
+    const params=new URLSearchParams({
+      query: q,
+      page: '1',
+      num_pages: '1',
+      date_posted: dateMap[dateP]||'week'
+    });
+    if(remote==='true') params.set('remote_jobs_only','true');
+
+    const res=await fetch(`https://jsearch.p.rapidapi.com/search?${params}`,{
+      headers:{'X-RapidAPI-Key':K.j,'X-RapidAPI-Host':'jsearch.p.rapidapi.com'}
+    });
+    if(!res.ok){
+      const errBody = await res.text();
+      log('err',`JSearch error ${res.status}: ${errBody.slice(0,200)}`);
+      done();return;
+    }
+    const data=await res.json();
+    const jobs=data.data||[];
+    log('ok',`Found ${jobs.length} listings`);
+    if(!jobs.length){log('info','No results — try broadening your search');done();return;}
+
+    results=jobs.map((j,i)=>({
+      job_id: j.job_id||'r'+i,
+      role: j.job_title||'Unknown',
+      company: j.employer_name||'Unknown',
+      posted: j.job_posted_at_datetime_utc?.slice(0,10)||'',
+      remote: !!j.job_is_remote,
+      salary: j.job_min_salary?`$${Math.round(j.job_min_salary/1000)}k–$${Math.round(j.job_max_salary/1000)}k`:'',
+      apply_link: j.job_apply_link||j.job_google_link||'',
+      jd: [j.job_title,j.employer_name,j.job_description,j.job_is_remote?'Remote':j.job_city].filter(Boolean).join('\n').slice(0,1800),
+      score: null, badges:[], breakdown:''
+    }));
+
+    log('ok',`Done! ${results.length} jobs loaded. Copy the score prompt to get Claude to rank them.`);
+    renderResults();
+  }catch(e){log('err','Error: '+e.message);}
+  done();
+}
+
+function done(){$('run-btn').disabled=false;$('run-txt').textContent='⚡ Find jobs';}
+
+function renderResults(){
+  $('results-area').style.display='block';
+  $('res-sum').textContent=`${results.length} jobs found`;
+  $('results-list').innerHTML=results.map((j,i)=>{
+    const scored=j.score!==null;
+    const sc=j.score>=70?'var(--green)':j.score>=45?'var(--amber)':'var(--red)';
+    const inQ=queue.some(q=>q.job_id===j.job_id);
+    return `<div class="job-card" id="jc${i}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div style="flex:1">
+          <div class="jt">${j.role}</div>
+          <div class="jco">${j.company}${j.posted?' · '+j.posted:''}</div>
+          <div class="jmeta">
+            ${j.remote?'<span class="badge bteal">Remote</span>':''}
+            ${j.salary?`<span class="badge bamb">${j.salary}</span>`:''}
+            ${(j.badges||[]).map(b=>`<span class="badge bpurp">${b}</span>`).join('')}
+          </div>
+          ${scored&&j.breakdown?`<div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:9px;line-height:1.7">${j.breakdown}</div>`:''}
+        </div>
+        <div style="text-align:center;flex-shrink:0;min-width:52px">
+          ${scored
+            ?`<div style="font-size:26px;font-weight:800;font-family:var(--mono);color:${sc};line-height:1">${j.score}</div><div style="font-family:var(--mono);font-size:10px;color:var(--dim)">/100</div>`
+            :`<span class="badge bamb">Unscored</span>`}
+        </div>
+      </div>
+      <div class="jact">
+        ${!scored?`<button class="btn btn-teal btn-s" onclick="copySingleScore(${i})">Copy score prompt →</button>`:''}
+        <button class="btn btn-p btn-s" id="qb${i}" onclick="queueJob(${i})">${inQ?'✓ Queued':'Queue for tailoring'}</button>
+        <button class="btn btn-g btn-s" onclick="addTrFromSearch(${i})">Add to tracker</button>
+        ${j.apply_link?`<a href="${j.apply_link}" target="_blank"><button class="btn btn-g btn-s">View ↗</button></a>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  counts();
+}
+
+// ---- SCORE PROMPTS ----
+function buildScorePrompt(jobs){
+  const profile=`Name: ${P.name||'Candidate'}\nTarget role: ${P.role||''}\nExperience: ${P.yoe||''}\nLocation: ${P.loc||''}\nDeal-breakers: ${P.db||''}\nTarget companies: ${P.cos||''}\nResume:\n${P.resume?.slice(0,800)||'(no resume)'}`;
+  const jobsText=jobs.map((j,i)=>`--- JOB ${i+1}: ${j.role} @ ${j.company} ---\n${j.jd?.slice(0,600)}`).join('\n\n');
+  return `You are a career coach. Score each job listing for fit with this candidate. For EACH job return:
+SCORE: <0-100>
+BADGES: <2-3 short tags like "Remote", "Strong match", "Missing: Python", "Above target salary">
+BREAKDOWN: <2-3 bullet points with • — be blunt and specific about fit, gaps, red flags>
+---
+CANDIDATE PROFILE:
+${profile}
+
+JOBS TO SCORE:
+${jobsText}
+
+Return results in order, one block per job, no extra commentary.`;
+}
+
+function copySingleScore(i){
+  const prompt=buildScorePrompt([results[i]]);
+  navigator.clipboard.writeText(prompt);
+  toast('Prompt copied! Paste into Claude.ai → then use "Paste scores back"');
+}
+
+function copyScoreAll(){
+  if(!results.length){toast('Run a search first');return;}
+  const prompt=buildScorePrompt(results);
+  navigator.clipboard.writeText(prompt);
+  toast(`Score prompt for all ${results.length} jobs copied! Paste into Claude.ai`);
+}
+
+function showPasteAll(){$('paste-modal').style.display='flex';}
+function closePasteModal(){$('paste-modal').style.display='none';$('paste-input').value='';}
+
+function parseScoreResponse(){
+  const text=v('paste-input');
+  if(!text){toast('Paste Claude\'s response first');return;}
+  // Parse blocks — look for SCORE: lines
+  const lines=text.split('\n');
+  let jobIdx=0, cur={};
+  const parsed=[];
+  lines.forEach(line=>{
+    const sl=line.match(/^SCORE:\s*(\d+)/i);
+    const bl=line.match(/^BADGES?:\s*(.+)/i);
+    const dl=line.match(/^BREAKDOWN:\s*(.+)/i);
+    if(sl){
+      if(cur.score!==undefined) parsed.push({...cur});
+      cur={score:parseInt(sl[1]),badges:[],breakdown:''};
+    } else if(bl&&cur.score!==undefined){
+      cur.badges=bl[1].split(',').map(b=>b.trim()).filter(Boolean);
+    } else if(dl&&cur.score!==undefined){
+      cur.breakdown=dl[1];
+    } else if(cur.score!==undefined&&line.startsWith('•')){
+      cur.breakdown+=(cur.breakdown?'\n':'')+line;
+    }
+  });
+  if(cur.score!==undefined) parsed.push({...cur});
+
+  if(!parsed.length){toast('Could not parse scores — make sure you pasted Claude\'s full response');return;}
+
+  parsed.forEach((p,i)=>{
+    if(results[i]){results[i].score=p.score;results[i].badges=p.badges||[];results[i].breakdown=p.breakdown||'';}
+  });
+  results.sort((a,b)=>(b.score||0)-(a.score||0));
+  renderResults();
+  closePasteModal();
+  toast(`Scores applied to ${parsed.length} jobs ✓`);
+}
+
+function queueJob(i){
+  const j=results[i];
+  if(queue.some(q=>q.job_id===j.job_id)){toast('Already queued');return;}
+  queue.push({...j,resume_out:'',cover_out:'',outreach_out:''});
+  ls('ja_q',JSON.stringify(queue));
+  $('qb'+i).textContent='✓ Queued'; counts();
+  toast(`${j.role} @ ${j.company} queued`);
+}
+function queueAll(){
+  results.forEach((j,i)=>{
+    if(!queue.some(q=>q.job_id===j.job_id)){queue.push({...j,resume_out:'',cover_out:'',outreach_out:''});}
+    const b=$('qb'+i);if(b)b.textContent='✓ Queued';
+  });
+  ls('ja_q',JSON.stringify(queue)); counts(); toast('All jobs queued');
+}
+function addTrFromSearch(i){
+  const j=results[i];
+  if(tracker.some(t=>t.job_id===j.job_id)){toast('Already in tracker');return;}
+  tracker.unshift({job_id:j.job_id,role:j.role,company:j.company,score:j.score,salary:j.salary||'',date:new Date().toLocaleDateString(),status:'Researching',notes:'',apply_link:j.apply_link||''});
+  saveTr(); toast('Added to tracker');
+}
+
+// ---- TAILOR ----
+function buildDocPrompt(j, type){
+  const extras={
+    resume:`Style: ATS-optimized. Use keywords from the job description. Reorder bullet points to match. Return full resume as plain text.`,
+    cover:`Write a 3–4 paragraph cover letter. No generic openers like "I am excited to apply". Be direct, specific, confident. Plain text.`,
+    outreach:`Write a short LinkedIn DM to a recruiter (5–6 sentences max). Sound human, not like a template. Plain text.`
+  };
+  return `${extras[type]}
+
+CANDIDATE: ${P.name||''}, ${P.role||''}, ${P.yoe||''} experience
+Location: ${P.loc||''}
+Unique value: ${P.uvp||''}
+
+RESUME:
+${P.resume||''}
+
+JOB DESCRIPTION:
+${j.jd?.slice(0,1400)||''}`;
+}
+
+function renderTailQ(){
+  const empty=$('tailor-empty'),content=$('tailor-content');
+  if(!queue.length){empty.style.display='block';content.style.display='none';return;}
+  empty.style.display='none'; content.style.display='block';
+  $('q-sum').textContent=`${queue.length} job${queue.length>1?'s':''} queued`;
+  $('tailor-list').innerHTML=queue.map((j,i)=>{
+    const allDone=j.resume_out&&j.cover_out&&j.outreach_out;
+    return `<div class="card" style="margin-bottom:13px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px">
+        <div>
+          <div style="font-size:14px;font-weight:700">${j.role}</div>
+          <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px">${j.company}${j.score?' · Score: '+j.score+'/100':''}</div>
+        </div>
+        <div style="display:flex;gap:7px;align-items:center">
+          ${allDone?'<span class="badge bgrn">✓ All docs ready</span>':'<span class="badge bamb">In progress</span>'}
+          <button class="btn btn-d btn-s" onclick="removeQ(${i})">✕</button>
+        </div>
+      </div>
+      <div class="subtabs">
+        <div class="stab active" onclick="showDoc(${i},'resume',this)">Resume ${j.resume_out?'✓':''}</div>
+        <div class="stab" onclick="showDoc(${i},'cover',this)">Cover letter ${j.cover_out?'✓':''}</div>
+        <div class="stab" onclick="showDoc(${i},'outreach',this)">Outreach ${j.outreach_out?'✓':''}</div>
+      </div>
+
+      <div id="td${i}-resume">
+        ${docSection(i,'resume',j.resume_out)}
+      </div>
+      <div id="td${i}-cover" style="display:none">
+        ${docSection(i,'cover',j.cover_out)}
+      </div>
+      <div id="td${i}-outreach" style="display:none">
+        ${docSection(i,'outreach',j.outreach_out)}
+      </div>
+
+      <div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
+        <button class="btn btn-g btn-s" onclick="addQtoTr(${i})">Add to tracker</button>
+        ${j.apply_link?`<a href="${j.apply_link}" target="_blank"><button class="btn btn-g btn-s">View job ↗</button></a>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function docSection(i,type,saved){
+  const labels={resume:'resume',cover:'cover letter',outreach:'outreach message'};
+  if(saved){
+    return `<div style="position:relative">
+      <div class="result-saved">${escHtml(saved)}</div>
+      <button class="cpybtn" onclick="navigator.clipboard.writeText(queue[${i}].${type}_out);toast('Copied!')">Copy</button>
+    </div>
+    <div style="display:flex;gap:7px;margin-top:9px">
+      <button class="btn btn-teal btn-s" onclick="copyDocPrompt(${i},'${type}')">Regenerate prompt →</button>
+      <button class="btn btn-g btn-s" onclick="openResultModal(${i},'${type}')">Paste new version</button>
+    </div>`;
+  }
+  return `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button class="btn btn-teal btn-s" onclick="copyDocPrompt(${i},'${type}')">Copy ${labels[type]} prompt →</button>
+    <button class="btn btn-g btn-s" onclick="openResultModal(${i},'${type}')">Paste Claude's response</button>
+  </div>`;
+}
+
+function showDoc(i,doc,el){
+  ['resume','cover','outreach'].forEach(d=>$(`td${i}-${d}`).style.display=d===doc?'block':'none');
+  el.closest('.subtabs').querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function copyDocPrompt(i,type){
+  const prompt=buildDocPrompt(queue[i],type);
+  navigator.clipboard.writeText(prompt);
+  const labels={resume:'resume',cover:'cover letter',outreach:'outreach message'};
+  toast(`${labels[type]} prompt copied! Paste into Claude.ai`);
+}
+
+function copyAllResumes(){
+  if(!queue.length){toast('Queue is empty');return;}
+  const prompts=queue.map((j,i)=>`=== JOB ${i+1}: ${j.role} @ ${j.company} ===\n${buildDocPrompt(j,'resume')}`).join('\n\n\n');
+  navigator.clipboard.writeText(prompts);
+  toast(`Resume prompts for all ${queue.length} jobs copied!`);
+}
+
+let _rModal={idx:null,type:null};
+function openResultModal(i,type){
+  _rModal={idx:i,type};
+  const labels={resume:'Paste tailored resume',cover:'Paste cover letter',outreach:'Paste outreach message'};
+  $('result-modal-title').textContent=labels[type];
+  $('result-input').value='';
+  $('result-modal').style.display='flex';
+}
+function closeResultModal(){$('result-modal').style.display='none';}
+function saveResult(){
+  const text=v('result-input');
+  if(!text){toast('Paste a response first');return;}
+  queue[_rModal.idx][_rModal.type+'_out']=text;
+  ls('ja_q',JSON.stringify(queue));
+  closeResultModal(); renderTailQ();
+  toast('Saved ✓');
+}
+
+function removeQ(i){queue.splice(i,1);ls('ja_q',JSON.stringify(queue));renderTailQ();counts();}
+function addQtoTr(i){
+  const j=queue[i];
+  if(tracker.some(t=>t.job_id===j.job_id)){toast('Already in tracker');return;}
+  tracker.unshift({job_id:j.job_id,role:j.role,company:j.company,score:j.score||null,salary:j.salary||'',date:new Date().toLocaleDateString(),status:'Applied',notes:'',apply_link:j.apply_link||''});
+  saveTr(); toast('Added to tracker');
+}
+
+// ---- TRACKER ----
+function renderTracker(){
+  const empty=$('tr-empty'),table=$('tr-table'),body=$('tr-body');
+  if(!tracker.length){empty.style.display='block';table.style.display='none';}
+  else{empty.style.display='none';table.style.display='table';}
+  body.innerHTML=tracker.map((j,i)=>{
+    const sc=j.score!=null?`<span style="font-weight:700;color:${j.score>=70?'var(--green)':j.score>=45?'var(--amber)':'var(--red)'};font-family:var(--mono)">${j.score}</span>`:'—';
+    return `<tr>
+      <td><div style="font-weight:600">${j.role}</div><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">${j.company}</div></td>
+      <td>${sc}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${j.date}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${j.salary||'—'}</td>
+      <td><select class="stsel" onchange="updSt(${i},this.value)">${STATUSES.map(s=>`<option ${s===j.status?'selected':''}>${s}</option>`).join('')}</select></td>
+      <td style="font-size:12px;color:var(--muted);max-width:160px">${j.notes||''}</td>
+      <td style="display:flex;gap:5px">
+        ${j.apply_link?`<a href="${j.apply_link}" target="_blank"><button class="btn btn-g btn-s">↗</button></a>`:''}
+        <button class="btn btn-d btn-s" onclick="rmJob(${i})">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+  $('st-tot').textContent=tracker.length;
+  $('st-act').textContent=tracker.filter(j=>['Applied','Phone screen','Interview'].includes(j.status)).length;
+  $('st-int').textContent=tracker.filter(j=>j.status==='Interview').length;
+  $('st-off').textContent=tracker.filter(j=>j.status==='Offer').length;
+  counts();
+}
+function saveTr(){ls('ja_t',JSON.stringify(tracker));renderTracker();}
+function updSt(i,s){tracker[i].status=s;saveTr();}
+function rmJob(i){tracker.splice(i,1);saveTr();}
+function toggleAF(){const f=$('add-form');f.style.display=f.style.display==='none'?'block':'none';}
+function addManual(){
+  const role=v('af-role'),co=v('af-co');
+  if(!role||!co){toast('Role and company required');return;}
+  tracker.unshift({role,company:co,salary:v('af-sal'),date:v('af-date')||new Date().toLocaleDateString(),status:'Applied',notes:v('af-notes'),apply_link:v('af-url'),job_id:'m'+Date.now(),score:null});
+  saveTr(); toggleAF();
+  ['af-role','af-co','af-sal','af-date','af-notes','af-url'].forEach(id=>$(id).value='');
+  toast('Added ✓');
+}
+
+function copyFollowUpPrompt(){
+  const due=tracker.filter(j=>['Applied','Phone screen'].includes(j.status));
+  if(!due.length){toast('No jobs in Applied or Phone Screen status');return;}
+  const prompt=`Write short, professional follow-up messages for these job applications. 2–3 sentences each. Be direct and confident — no fluff.
+
+Candidate: ${P.name||'the candidate'}
+
+Applications:
+${due.map(j=>`- ${j.role} at ${j.company} (Status: ${j.status}, Applied: ${j.date})`).join('\n')}`;
+  navigator.clipboard.writeText(prompt);
+  $('fu-notice').style.display='block';
+  toast('Follow-up prompt copied!');
+}
+
+// ---- UTILS ----
+function log(type,msg){
+  const el=$('slog'),ts=new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const line=document.createElement('div');
+  line.className=`ll ${type}`;
+  line.innerHTML=`<span class="ts">${ts}</span><span class="msg">${msg}</span>`;
+  el.appendChild(line); el.scrollTop=el.scrollHeight;
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(msg){
+  const t=$('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
