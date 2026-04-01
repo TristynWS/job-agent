@@ -5,7 +5,7 @@ A browser-based job hunting tool built to automate the most time-consuming parts
 Built using HTML/CSS/JavaScript with Claude AI handling the intelligent scoring and document generation.
 
 --- 
-
+ 
 ## What it does
 
 **Job Search**
